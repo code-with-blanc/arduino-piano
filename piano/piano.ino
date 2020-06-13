@@ -1,9 +1,9 @@
 #include "pins.h"
 #include "keyboard.h"
 
-// #include <MIDI.h>
+#include "arduino_midi_library-5.0.2/src/MIDI.h"
 
-// MIDI_CREATE_DEFAULT_INSTANCE();
+MIDI_CREATE_DEFAULT_INSTANCE();
 
 float isr_millis_total = 2.0;
 unsigned long isr_micros_total = isr_millis_total * 1000L;
@@ -56,7 +56,7 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void sendMidi(int keyNum) {
-  // MIDI.sendNoteOn(keyToMidiNote(keyNum), 127, 1);
+  MIDI.sendNoteOn(keyToMidiNote(keyNum), 127, 1);
 }
 
 void loop() {
