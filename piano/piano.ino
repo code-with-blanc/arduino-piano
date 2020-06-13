@@ -1,9 +1,9 @@
-#include "constants.h"
+#include "pins.h"
 #include "keyboard.h"
 
-#include <MIDI.h>
+// #include <MIDI.h>
 
-MIDI_CREATE_DEFAULT_INSTANCE();
+// MIDI_CREATE_DEFAULT_INSTANCE();
 
 float isr_millis_total = 2.0;
 unsigned long isr_micros_total = isr_millis_total * 1000L;
@@ -18,8 +18,10 @@ void setupISR() {
   TCCR1A = 0;
   TCCR1B = 0;
   TCNT1  = 0; //initialize counter value to 0
-  // set compare match register for 10hz increments
-  OCR1A = (isr_millis_total * 15.625) - 1; // = (T_int [ms] * 1/1000 * (16*10^6)/(1024)) - 1  = (T_int * 15.625) - 1  [must be <65536]
+  // set compare match register
+  // Formula is:
+  // OCR1A = (T_int [ms] * 1/1000 * (16*10^6)/(1024)) - 1      [must be <65536]
+  OCR1A = (isr_millis_total * 15.625) - 1;
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS10 and CS12 bits for 1024 prescaler
@@ -31,7 +33,7 @@ void setupISR() {
 }
 
 void setup() {
-  Keyboard::setupPins();
+  KeyboardHardware::setupPins();
   pinMode(LED_BUILTIN, OUTPUT);
 
   Serial.begin(115200);
@@ -54,7 +56,7 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 void sendMidi(int keyNum) {
-  MIDI.sendNoteOn(keyToMidiNote(keyNum), 127, 1);
+  // MIDI.sendNoteOn(keyToMidiNote(keyNum), 127, 1);
 }
 
 void loop() {
