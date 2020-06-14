@@ -4,6 +4,9 @@
 
 #include "arduino_midi_library-5.0.2/src/MIDI.h"
 
+#define MIDI_CH 1
+#define MIDI_VEL 127
+
 //// Fn declarations
 void setupISR();
 
@@ -37,23 +40,18 @@ ISR(TIMER1_COMPA_vect) {
   isrProfiler.onISRExit();
 }
 
-void sendMidi(int keyNum) {
-  MIDI.sendNoteOn(keyToMidiNote(keyNum), 127, 1);
-}
-
 void loop() {
   while(keyboard.hasEvent()) {
     const KeyboardEvent event = keyboard.popEvent();
-    Serial.print(millis());
-    Serial.print(": key ");
-    Serial.print(event.key);
-    Serial.print("   type ");
-    Serial.print(event.type);
-    Serial.print("\n");
+    if (event.type == KEY_PRESS) {
+      MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+    } else if(event.type == KEY_RELEASE) {
+      MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+    }
   }
 
-  isrProfiler.printReport();
-  delay(100);
+  // isrProfiler.printReport();
+  delay(2);
 }
 
 void setupISR() {
