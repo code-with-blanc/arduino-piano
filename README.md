@@ -8,7 +8,11 @@ It is a hobby project but let's put it in github because reasons.
 
 The arduino is connected directly to the keys in an electronic piano.
 
-The code in an ISR reads the pressed keys and stores the state in memory. The main loop polls the registered key states and sends it as MIDI messages to the computer via the serial connection. On the computer a software (e.g. the [Hairless MIDI Bridge](https://projectgus.github.io/hairless-midiserial/) ) translates the serial messages to a MIDI device.
+An [ISR](https://en.wikipedia.org/wiki/Interrupt_handler) reads the pressed keys and stores the state in memory. Based on key changes (press, release) events are registered in an event queue.
+
+The main loop polls the event queue and sends corresponding MIDI messages to the computer via the Arduino serial.
+
+On the computer a software (e.g. the [Hairless MIDI Bridge](https://projectgus.github.io/hairless-midiserial/) ) presents the serial connection as a virtual MIDI device that can be connected to a soft synth or DAW.
 
 ## Code organization
 ```
@@ -17,12 +21,16 @@ The code in an ISR reads the pressed keys and stores the state in memory. The ma
 
 KeyboardHardware class:
   - key reading and MUX manipulation
-  - all hardware-specific code should be 
-    contained in this class
+  - all hardware-specific code should be contained in this class
 
 Keyboard class:
   - actual keyboard logic, like registering in memory 
-    which keys are pressed
+    which keys are pressed and handling the event queue
+
+ISRProfiler class:
+  - Utility logic to debounce ISR timing and usage
+
+The Arduino Media Library (https://github.com/FortySevenEffects/arduino_midi_library) is replicated in the project source because Arduino doesn't have a covenient package manage system. This allows the sketch to be run without installing additional dependencies in the Arduino IDE.
 ```
 
 ## Electric circuit
