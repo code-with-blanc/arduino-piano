@@ -48,10 +48,11 @@ void loop() {
     } else if(event.type == KEY_RELEASE) {
       MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     }
+
+    delayMicroseconds(50);
   }
 
   // isrProfiler.printReport();
-  delay(2);
 }
 
 void setupISR() {

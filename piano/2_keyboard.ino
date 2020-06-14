@@ -4,6 +4,7 @@
 Keyboard::Keyboard() {
   for(byte i = 0; i < sizeof(_keys); i++) {
     _keys[i] = 0;
+    _offCount[i] = 0;
   }
   for(int i = 0; i < EVENT_QUEUE_SIZE; i++) {
     _eventQueue[i].type = EMPTY;
@@ -20,11 +21,23 @@ void Keyboard::scanBank(byte bankNum) {
     const int key = bankNum*NUM_KEYS + k;
     bool oldValue = _keys[key];
 
-    if(newValue != oldValue) {
-      _keys[key] = newValue;
-      if(newValue) {
+    if(newValue) {
+      _offCount[key] = 0;
+
+      if(newValue != oldValue) {
+        _keys[key] = newValue;
         pushEvent(KEY_PRESS, key);
-      } else {
+      }
+    }
+
+    if(!newValue) {
+      _offCount[key]++;
+      if(_offCount[key] > 200)
+        _offCount[key] = 200;
+
+      // Regitster KEY_RELEASE after some off readings to prevent bouncing
+      if(_offCount[key] == 10) {
+        _keys[key] = newValue;
         pushEvent(KEY_RELEASE, key);
       }
     }
