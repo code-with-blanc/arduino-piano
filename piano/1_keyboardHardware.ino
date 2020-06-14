@@ -55,7 +55,7 @@ void KeyboardHardware::setActiveBank(byte bankNum) {
   }
 }
 
-byte KeyboardHardware::readKey(byte keyNum) {
+byte KeyboardHardware::readKeyPin(byte keyNum) {
   byte key = 255;
   switch(keyNum) {
     case 0: key = PIN_K0; break;

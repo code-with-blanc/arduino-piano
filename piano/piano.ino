@@ -5,7 +5,7 @@
 
 MIDI_CREATE_DEFAULT_INSTANCE();
 
-float isr_millis_total = 2.0;
+float isr_millis_total = 0.5;
 unsigned long isr_micros_total = isr_millis_total * 1000L;
 unsigned long isr_micros_used = 0;
 
@@ -60,31 +60,27 @@ void sendMidi(int keyNum) {
 }
 
 void loop() {
-//  Serial.write(bankToChar(keyboard.getLastBank()));
-//  Serial.write(keyToChar(keyboard.getLastKey()));
-//  Serial.write('\n');
+  while(keyboard.hasEvent()) {
+    const KeyboardEvent event = keyboard.popEvent();
+    Serial.print(millis());
+    Serial.print(": key ");
+    Serial.print(event.key);
+    Serial.print("   type ");
+    Serial.print(event.type);
+    Serial.print("\n");
+  }
 
-
-//  int num = keyboard.getNumKeysPressed();
-//  Serial.print(num);
-//  Serial.print("  ");
-//  for(int i = 0; i < num; i++) {
-//    Serial.print('#');
-//  }
-//  Serial.print('\n');
-
-  keyboard.forEachPressed(&sendMidi);
-
-//  reportISRTiming();
-  delay(50);
+  // reportISRTiming();
+  delay(5);
 }
 
 void reportISRTiming() {
   // serial implementation
   int pctg = 100.0 * ((float) isr_micros_used)/((float) isr_micros_total);
-  Serial.print("ISR usage pctg: ");
+  Serial.print(millis());
+  Serial.print(": ISR usage  ");
   Serial.print(pctg);
-  Serial.print('\n');
+  Serial.print("%\n");
   
 //  // LED implementation
 //  int t = 200;
@@ -96,3 +92,4 @@ void reportISRTiming() {
 //  digitalWrite(LED_BUILTIN, LOW);
 //  delay(t_off);
 }
+

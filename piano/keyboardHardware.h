@@ -8,7 +8,7 @@ class KeyboardHardware {
   public:
     static void setupPins();
     static void setActiveBank(byte bankNum);
-    static byte readKey(byte keyNum);
+    static byte readKeyPin(byte keyNum);
 
   private:
     static void configMux(byte c_val, byte ab_val);
