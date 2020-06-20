@@ -3,7 +3,7 @@
 
 #include "keyboardHardware.h"
 
-#define EVENT_QUEUE_SIZE 32
+#define EVENT_QUEUE_SIZE 10
 #define OFF_COUNT_MAX 200
 
 enum KeyboardEventType : byte {
