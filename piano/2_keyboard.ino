@@ -4,7 +4,7 @@
 Keyboard::Keyboard() {
   for(byte i = 0; i < sizeof(_keys); i++) {
     _keys[i] = 0;
-    _offCount[i] = 0;
+    _offCount[i] = OFF_COUNT_MAX;
   }
   for(int i = 0; i < EVENT_QUEUE_SIZE; i++) {
     _eventQueue[i].type = EMPTY;
@@ -32,8 +32,8 @@ void Keyboard::scanBank(byte bankNum) {
 
     if(!newValue) {
       _offCount[key]++;
-      if(_offCount[key] > 200)
-        _offCount[key] = 200;
+      if(_offCount[key] > OFF_COUNT_MAX)
+        _offCount[key] = OFF_COUNT_MAX;
 
       // Regitster KEY_RELEASE after some off readings to prevent bouncing
       if(_offCount[key] == 10) {

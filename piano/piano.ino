@@ -9,6 +9,7 @@
 
 //// Fn declarations
 void setupISR();
+void startupLedBlink();
 
 //// Global scope
 MIDI_CREATE_DEFAULT_INSTANCE();
@@ -25,9 +26,7 @@ void setup() {
   Serial.begin(115200);
   setupISR();
 
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
+  startupLedBlink();
 }
 
 int isrCount = 0;
@@ -40,17 +39,24 @@ ISR(TIMER1_COMPA_vect) {
   isrProfiler.onISRExit();
 }
 
+int loopCount = 0;
 void loop() {
   while(keyboard.hasEvent()) {
     const KeyboardEvent event = keyboard.popEvent();
     if (event.type == KEY_PRESS) {
-      MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      // MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     } else if(event.type == KEY_RELEASE) {
-      MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      // MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     }
 
     delayMicroseconds(50);
+    // if(eventCount > 200) {
+    //   digitalWrite(LED_BUILTIN, HIGH);
+    // }
   }
+
+  loopCount++;
+  delay(50);
 
   // isrProfiler.printReport();
 }
@@ -74,4 +80,13 @@ void setupISR() {
   TIMSK1 |= (1 << OCIE1A);
 
   sei(); //allow interrupts
+}
+
+void startupLedBlink() {
+  for(int i = 0; i < 3; i++) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(50);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(50);
+  }
 }
