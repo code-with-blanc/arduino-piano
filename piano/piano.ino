@@ -42,10 +42,15 @@ ISR(TIMER1_COMPA_vect) {
 void loop() {
   while(keyboard.hasEvent()) {
     const KeyboardEvent event = keyboard.popEvent();
+    
+    Serial.print("Note ");
+    Serial.print(event.key);
     if (event.type == KEY_PRESS) {
-      MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      Serial.println("   ON");
+      // MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     } else if(event.type == KEY_RELEASE) {
-      MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      Serial.println("   OFF");
+      // MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     }
 
     delayMicroseconds(50);
@@ -77,10 +82,13 @@ void setupISR() {
 }
 
 void startupLedBlink() {
+  const int t_on = 100;
+  const int t_off = 100;
+
   for(int i = 0; i < 3; i++) {
     digitalWrite(LED_BUILTIN, HIGH);
-    delay(50);
+    delay(t_on);
     digitalWrite(LED_BUILTIN, LOW);
-    delay(50);
+    delay(t_off);
   }
 }

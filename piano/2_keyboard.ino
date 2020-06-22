@@ -2,11 +2,10 @@
 #include "keyboard.h"
 
 Keyboard::Keyboard() {
-  for(byte i = 0; i < sizeof(_keys); i++) {
-    _keys[i] = 0;
-    _offCount[i] = OFF_COUNT_MAX;
+  for(byte i = 0; i < sizeof(_keyCounter); i++) {
+    _keyCounter[i] = -KB_KEY_COUNTER_MAX;
   }
-  for(int i = 0; i < EVENT_QUEUE_SIZE; i++) {
+  for(int i = 0; i < KB_EVENT_QUEUE_SIZE; i++) {
     _eventQueue[i].type = EMPTY;
   }
 }
@@ -15,29 +14,40 @@ void Keyboard::scanBank(byte bankNum) {
   KeyboardHardware::setActiveBank(bankNum);
   delayMicroseconds(10);
   
-  // scan keys
+  // scan keys  
   for(int k = 0; k < NUM_KEYS; k++) {
-    byte newValue = KeyboardHardware::readKeyPin(k);
     const int key = bankNum*NUM_KEYS + k;
-    bool oldValue = _keys[key];
+    byte newValue = KeyboardHardware::readKeyPin(k);
+    byte wasPressed = _keyCounter[key] >= 0;
 
-    if(newValue) {
-      _offCount[key] = 0;
+    if(newValue != wasPressed) {
+      // key value change, reset count value
+      if(newValue) {
+        _keyCounter[key] = 0;
+      } else {
+        _keyCounter[key] = -1;
+      }
+    } else {
+      // key in same state as last reading
 
-      if(newValue != oldValue) {
-        _keys[key] = newValue;
+      // increase counting
+      if(wasPressed) {
+        _keyCounter[key]++;
+        if(_keyCounter[key] > KB_KEY_COUNTER_MAX) {
+          _keyCounter[key] = KB_KEY_COUNTER_MAX;
+        }
+      } else {
+        _keyCounter[key]--;
+        if(_keyCounter[key] < -KB_KEY_COUNTER_MAX) {
+          _keyCounter[key] = -KB_KEY_COUNTER_MAX;
+        }
+      }
+
+      // register event if passed debouncing threshold
+      if(_keyCounter[key] == KB_KEY_COUNTER_THRESHOLD) {
         pushEvent(KEY_PRESS, key);
       }
-    }
-
-    if(!newValue) {
-      _offCount[key]++;
-      if(_offCount[key] > OFF_COUNT_MAX)
-        _offCount[key] = OFF_COUNT_MAX;
-
-      // Regitster KEY_RELEASE after some off readings to prevent bouncing
-      if(_offCount[key] == 10) {
-        _keys[key] = newValue;
+      if(_keyCounter[key] == -KB_KEY_COUNTER_THRESHOLD) {
         pushEvent(KEY_RELEASE, key);
       }
     }
@@ -65,7 +75,7 @@ KeyboardEvent Keyboard::popEvent() {
 
 void Keyboard::pushEvent(KeyboardEventType type, byte key) {
   _eventQueuePosition++;
-  if(_eventQueuePosition == EVENT_QUEUE_SIZE-1) {
+  if(_eventQueuePosition == KB_EVENT_QUEUE_SIZE-1) {
     _eventQueue[_eventQueuePosition].type = EVENT_QUEUE_OVERFLOW;
     _eventQueuePosition--;
     return;

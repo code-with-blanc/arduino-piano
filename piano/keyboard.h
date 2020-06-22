@@ -3,9 +3,6 @@
 
 #include "keyboardHardware.h"
 
-#define EVENT_QUEUE_SIZE 10
-#define OFF_COUNT_MAX 200
-
 enum KeyboardEventType : byte {
   KEY_PRESS = 1,
   KEY_RELEASE = 0,
@@ -30,12 +27,16 @@ class Keyboard {
     KeyboardEvent popEvent();
 
   private:
+    #define KB_EVENT_QUEUE_SIZE 64
+    KeyboardEvent _eventQueue[KB_EVENT_QUEUE_SIZE];
+    int _eventQueuePosition = 0;
     void pushEvent(KeyboardEventType type, byte key);
 
-    byte _keys[NUM_BANKS*NUM_KEYS];
-    byte _offCount[NUM_BANKS*NUM_KEYS];
-    KeyboardEvent _eventQueue[EVENT_QUEUE_SIZE];
-    int _eventQueuePosition = 0;
+    // This counter increases when the key is pressed and decreases
+    // when released. When the threshold is reached, an event is generated
+    int8_t _keyCounter[NUM_BANKS*NUM_KEYS];
+    #define KB_KEY_COUNTER_MAX (int8_t) 100
+    #define KB_KEY_COUNTER_THRESHOLD 3   // >= 0 and <= 126
 };
 
 #endif
