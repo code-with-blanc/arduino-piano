@@ -15,7 +15,7 @@ void startupLedBlink();
 MIDI_CREATE_DEFAULT_INSTANCE();
 Keyboard keyboard;
 
-const float isr_millis_total = 0.2;
+const float isr_millis_total = 0.3;
 ISRProfiler isrProfiler(isr_millis_total);
 
 ////
@@ -26,15 +26,19 @@ void setup() {
   Serial.begin(115200);
   setupISR();
 
+  Serial.println("Startup.... ");
   startupLedBlink();
 }
 
-int isrCount = 0;
+unsigned int isrCount = 0;
 ISR(TIMER1_COMPA_vect) {
   isrProfiler.onISREnter();
 
   keyboard.scanBank(isrCount % NUM_BANKS);
   isrCount++;
+  if(isrCount > 30000) {
+    isrCount = 0;
+  }
 
   isrProfiler.onISRExit();
 }
@@ -46,17 +50,17 @@ void loop() {
     Serial.print("Note ");
     Serial.print(event.key);
     if (event.type == KEY_PRESS) {
-      Serial.println("   ON");
-      // MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      // Serial.println("   ON");
+      MIDI.sendNoteOn(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     } else if(event.type == KEY_RELEASE) {
-      Serial.println("   OFF");
-      // MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
+      // Serial.println("   OFF");
+      MIDI.sendNoteOff(keyToMidiNote(event.key), MIDI_VEL, MIDI_CH);
     }
 
     delayMicroseconds(50);
   }
 
-  delay(1);
+  delayMicroseconds(200);
   // isrProfiler.printReport();
 }
 
